@@ -19,5 +19,8 @@ class Settings(BaseSettings):
     minio_root_user: str
     minio_root_password: str
 
+    #Redis
+    redis_password: str
+
     model_config= SettingsConfigDict(env_file='.env')
 
