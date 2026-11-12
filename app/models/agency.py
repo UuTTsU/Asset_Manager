@@ -4,4 +4,4 @@ from .baseAbstract import BaseAbstract
 
 class Agency(BaseAbstract):
     __tablename__ = 'agencies'
-    user_id = mapped_column(Integer, ForeignKey('user.id'), primary_key=True, on_delete='cascade')
+    user_id = mapped_column(Integer, ForeignKey('users.id', ondelete="CASCADE"), index=True)

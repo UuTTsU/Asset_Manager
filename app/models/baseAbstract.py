@@ -2,6 +2,8 @@ from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.orm import mapped_column
 from app.core.database import Base
 
+
+#abstract class with fields that are common in all db tables
 class BaseAbstract(Base):
     __abstract__ = True
     id = mapped_column(Integer, primary_key=True)

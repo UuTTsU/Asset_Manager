@@ -29,7 +29,8 @@ services:
     ports:
      - "8000:80"
     volumes:
-     - .:/app
+      - ./app:/code/app
+      - ./alembic:/code/alembic
 
 #POSTGRESQL SERVER
   postgres:
@@ -81,17 +82,17 @@ services:
       - redis_data:/data
 
 #Celery worker service (currently out)
-  celery_worker:
-    build: .
-    container_name: assets-celery
-    env_file:
-      - .env
-    volumes:
-        - .:/app
-    depends_on:
-      - postgres
-      - redis
-    command: celery -A application.taskapp worker -l INFO
+#  celery_worker:
+#    build: .
+#    container_name: assets-celery
+#    env_file:
+#      - .env
+#    volumes:
+#        - .:/app
+#    depends_on:
+#      - postgres
+#      - redis
+#    command: celery -A application.taskapp worker -l INFO
 
 
 
