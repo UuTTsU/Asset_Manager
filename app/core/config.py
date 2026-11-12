@@ -9,11 +9,18 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_user: str
     postgres_password: str
+    postgres_url: str
+    postgres_port: int
+    postgres_host: str
 
     #mongodb validation
     mongo_db: str
     mongo_user: str
     mongo_password: str
+    mongo_host: str
+    mongo_port: int
+
+
 
     #minIO validation
     minio_root_user: str
