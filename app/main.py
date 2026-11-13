@@ -15,3 +15,6 @@ async def info(settings: Annotated[config.Settings, Depends(get_settings)]):
         "App_name": settings.app_name,
 
     }
+
+
+
