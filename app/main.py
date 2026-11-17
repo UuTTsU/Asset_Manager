@@ -19,3 +19,4 @@ async def info(settings: Annotated[config.Settings, Depends(get_settings)]):
     }
 
 app.include_router(auth_router, prefix="/auth")
+

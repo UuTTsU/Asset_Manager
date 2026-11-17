@@ -7,6 +7,7 @@ def test_valid_register_data():
     payload = {
         "name": "Giorgi",
         "last_name": "Beridze",
+        "username": "Utsu",
         "email": "giorgi@example.com",
         "password": "StrongPassword123",
         "repeat_password": "StrongPassword123",
@@ -23,7 +24,8 @@ def test_invalid_email_raises_error():
     # Arrange
     bad_payload = {
         "email": "not-an-email",
-        "password": "StrongPassword123!"
+        "password": "StrongPassword123!",
+        "username": "Utsu"
     }
 
     # Act & Assert

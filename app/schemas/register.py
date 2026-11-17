@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, EmailStr, model_validator, field_validato
 class RegisterSchema(BaseModel):
     name: str = Field(min_length=1,max_length=30)
     last_name: str= Field(min_length=1,max_length=20)
+    username: str = Field(min_length=3,max_length=30, pattern=r'^[a-zA-Z0-9]{3,20}$')
     email: EmailStr
     password: str = Field(min_length=8,max_length=255)
     repeat_password: str = Field(min_length=8,max_length=255)
@@ -28,7 +29,6 @@ class RegisterSchema(BaseModel):
 class RegisterResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    name: str
-    last_name: str
+    username: str
     email: EmailStr
 
