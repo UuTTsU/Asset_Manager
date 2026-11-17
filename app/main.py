@@ -2,8 +2,10 @@ from functools import lru_cache
 from typing import Annotated
 from fastapi import Depends, FastAPI
 from app.core import config
+from app.routers.auth import router as auth_router
 
 app = FastAPI()
+
 
 @lru_cache
 def get_settings():
@@ -16,5 +18,4 @@ async def info(settings: Annotated[config.Settings, Depends(get_settings)]):
 
     }
 
-
-
+app.include_router(auth_router, prefix="/auth")
