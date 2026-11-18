@@ -12,10 +12,13 @@ from app.dependencies.session import get_db
 from app.schemas.token import TokenResponseSchema
 from app.core.config import Settings
 from app.core.security import create_refresh_token
+from app.dependencies.auth import get_current_user
 
 router = APIRouter()
 
 settings = Settings()
+
+#------------------------------------endpoint for registration-------------------------------------
 @router.post("/register/",
              response_model=RegisterResponseSchema,
              status_code=status.HTTP_201_CREATED)
@@ -51,6 +54,8 @@ def register(
 
     return new_user
 
+
+#------------------------------------endpoint for login-------------------------------------
 @router.post("/token",
             response_model=TokenResponseSchema,
             status_code=status.HTTP_200_OK)
@@ -73,5 +78,13 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     return TokenResponseSchema(access_token=access_token, refresh_token=refresh_token,token_type="bearer")
 
 
+#-----------------------------------endpoint for refreshing account----------------------
 
+@router.get("/me",
+            response_model=RegisterResponseSchema,
+            status_code=status.HTTP_200_OK
+            )
+def get_me(current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    return current_user
 
