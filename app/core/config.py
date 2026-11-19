@@ -28,6 +28,8 @@ class Settings(BaseSettings):
 
     #Redis
     redis_password: str
+    redis_host: str
+    redis_port: int
 
     #JWT
     secret_key: str

@@ -1,6 +1,7 @@
-from datetime import timedelta
+from datetime import timedelta, UTC, datetime
 from typing import Annotated
 
+from app.core.client import redis_client
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
@@ -9,9 +10,9 @@ from app.models.user import User
 from app.schemas.register import RegisterSchema, RegisterResponseSchema
 from app.core.security import get_password_hash, verify_password, create_access_token
 from app.dependencies.session import get_db
-from app.schemas.token import TokenResponseSchema
+from app.schemas.token import TokenResponseSchema, AccessTokenResponseSchema, RefreshTokenRequestSchema
 from app.core.config import Settings
-from app.core.security import create_refresh_token
+from app.core.security import create_refresh_token, decode_refresh_token
 from app.dependencies.auth import get_current_user
 
 router = APIRouter()
@@ -78,7 +79,7 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     return TokenResponseSchema(access_token=access_token, refresh_token=refresh_token,token_type="bearer")
 
 
-#-----------------------------------endpoint for refreshing account----------------------
+#-----------------------------------access token validation router----------------------
 
 @router.get("/me",
             response_model=RegisterResponseSchema,
@@ -87,4 +88,49 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 def get_me(current_user: Annotated[User, Depends(get_current_user)],
 ) -> User:
     return current_user
+
+
+#-----------------------------------logout router (Through Redis blacklisting)----------------------
+
+@router.post("/logout",
+             status_code=status.HTTP_200_OK)
+def logout(body: RefreshTokenRequestSchema):
+    payload = decode_refresh_token(body.refresh_token)
+    current_timestamp = int(datetime.now(UTC).timestamp())
+    seconds_left = payload["exp"] - current_timestamp
+    if seconds_left > 0:
+        redis_client.setex(f"blacklist:{payload['jti']}", seconds_left, "revoked")
+
+    return {"detail":"successfully logged out"}
+
+
+
+#-----------------------------------refresh router----------------------
+@router.post("/refresh",
+            response_model=AccessTokenResponseSchema,)
+def refresh(body: RefreshTokenRequestSchema, db:Annotated[Session, Depends(get_db)]):
+    payload = decode_refresh_token(body.refresh_token)
+    if redis_client.exists(f"blacklist:{payload['jti']}"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = db.query(User).filter(User.username == payload["sub"]).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token = create_access_token(
+        data={"sub": user.username, "type": "access"},
+        expires_delta=timedelta(minutes=settings.access_token_expire_minutes),
+    )
+    return AccessTokenResponseSchema(access_token=access_token, token_type="bearer")
+
+
+
+
 

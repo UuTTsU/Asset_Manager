@@ -12,6 +12,8 @@ from app.dependencies.session import get_db
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 settings = Settings()
 
+#----------------------------------access token validation dependency------------------------------------
+
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -32,5 +34,6 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],db: Session =
     if user is None:
         raise credentials_exception
     return user
+
 
 
